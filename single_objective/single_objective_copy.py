@@ -5,9 +5,10 @@ from math import sqrt, pow, sin
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from requests import delete
 
 
-########### Case Studies ###########
+########### Init ###########
 
 cust_ord = pd.read_csv('CustOrd.csv')
 
@@ -38,6 +39,7 @@ if (n_population*n_genarations) > 100000:
     exit(0)
     
 # Dist_cent 'preprocessing'
+#print(dists_cent)
 dist = dists_cent.to_numpy()
 dist= np.delete(dist, 0, axis=1)
 
@@ -47,28 +49,40 @@ dist= np.delete(dist, 0, axis=1)'''
 
 ########### Functions ############
 
+def Create_Genes():
+    
+    gene = np.random.permutation(n_costumers+1)
+    
+    if n_costumers == 10: 
+        gene = np.delete(gene, np.where(gene==0)[0], axis=0)
+    
+    return gene
+
 # Plot Costumer location
 def plot_costumer_location(xy, max_client):
     
-    plt.scatter(xy['X'][0:max_client], xy['Y'][0:max_client])
-    plt.scatter(xy['X'][0], xy['Y'][0], c = '#d62728' , label = "Warehouse")
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.legend(loc='upper right')
-    plt.title('Costumer location')
-    plt.show()
+    fig, ax = plt.subplots()
+    ax.scatter(xy['X'][0:max_client],  xy['Y'][0:max_client])
+    ax.scatter(xy['X'][0], xy['Y'][0], c = '#d62728' , label = "Warehouse")
     
+    for i, txt in enumerate(xy['Customer XY'][0:max_client]):
+        ax.annotate(txt, (xy['X'][i], xy['Y'][i]))
+    
+    plt.show()
+        
     return
 
 # Cost fuction we want to minimize
 # Hard restriction: Truck max capacity = 1000 products    
 def Cost_Function(individual):
-    
+        
     distances = []
     distances.append(dist[0,individual[0]]) # Distance between the warehouse and the first client
     
     for i in range (len(individual)-1):
         distances.append(dist[individual[i], individual[i+1]]) # Distance between each costumer in our possible solution
+    
+    distances.append(dist[individual[int(len(individual)-1)],0])
     
     return sum(distances),
 
@@ -78,11 +92,11 @@ def check_feasiblity(individual):
     Returns True if individual is feasible (or constraint not violated),
     False otherwise
     '''
-    if (n_costumers==10 and (0 in individual)) or (len(set(individual)) != len(individual)):
+    if (len(set(individual)) != len(individual)):
         # Indiviual contains repeated values
-        return True
-    else:
         return False
+    else:
+        return True
 
 
 def penalty_fxn(individual):
@@ -91,7 +105,7 @@ def penalty_fxn(individual):
     It is assumed that if the output of this function is added to the objective function fitness values,
     the individual has violated the constraint.
     '''
-    return Cost_Function(individual=individual)**2
+    return pow(int(Cost_Function(individual=individual)[0]),2)
 
 # Funtion to save statistics across diferent generations
 def SaveSatistics(individual):
@@ -116,7 +130,7 @@ toolbox = base.Toolbox()
 # Register Genes
 # The genes will be a list of a possible path
 # Were each index is a costumer
-toolbox.register("Genes", np.random.permutation, n_costumers)
+toolbox.register("Genes", Create_Genes)
 
 # (5)
 # Register the individuals
@@ -128,23 +142,23 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 # (7)
 # Crossover operator
-toolbox.register("mate", tools.cxPartialyMatched)
+toolbox.register("mate", tools.cxOnePoint)
 
 # (8)
 # Mutation operator
-toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.5)
+toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.1)
 
 # (9)
 # Selection operator 
-toolbox.register("select", tools.selTournament, tournsize=5)
+toolbox.register("select", tools.selTournament, tournsize = 4)
 
 # (10)
 # Solution Evaluation
 toolbox.register("evaluate", Cost_Function)
 
 # (11)
-# Constraints
-toolbox.decorate("evaluate", tools.DeltaPenalty(check_feasiblity, 1e30)) 
+# Dealing with Constraints: Penalties
+toolbox.decorate("evaluate", tools.DeltaPenalty(check_feasiblity, 1000, penalty_fxn)) 
 
 # (12)
 # Save statistics across genarations
@@ -165,7 +179,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.7, 0.2
+CXPB, MUTPB = 0.5, 0.5
 
 
 ########## main() ###########
@@ -175,19 +189,22 @@ def main():
         
     # (16)
     # Initiate population
-    pop = toolbox.population(n=40)
+    pop = toolbox.population(n=n_population)
         
     start_time1 = time.process_time() # Program time
     
     # (17)
     # Run evolutionary algorithm
     result, log = algorithms.eaSimple(population=pop, toolbox=toolbox, cxpb=CXPB, mutpb=MUTPB,
-                                      stats=stats, ngen=30, halloffame=hof, verbose=True)
+                                      stats=stats, ngen=n_genarations, halloffame=hof, verbose=True)
 
     #print('Result:', result)
     print('Hall Of Fame:', hof)
     print ("Time Used ---> ", time.process_time() - start_time1, "seconds")
 
+
+    plot_costumer_location(xy=xy_cent, max_client=n_costumers+1)
+    
     return
 
 if __name__ == "__main__":
