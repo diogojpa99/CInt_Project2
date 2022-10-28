@@ -1,11 +1,10 @@
 from deap import base, tools, creator, algorithms
 import time
 import random
-from math import sqrt, pow, sin
+from math import pow
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from requests import delete
 
 
 ########### Init ###########
@@ -29,10 +28,10 @@ n_costumers = 10
 #print(sum(cust_ord['Orders'])) 
 
 # Number of genarations
-n_genarations = 250
+n_genarations = 100
 
 # Max number of the population
-n_population = 40
+n_population = 100
 
 if (n_population*n_genarations) > 100000:
     print('ERROR: Maximum number of evaluations has exceeded')
@@ -146,7 +145,7 @@ toolbox.register("mate", tools.cxOnePoint)
 
 # (8)
 # Mutation operator
-toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.1)
+toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
 
 # (9)
 # Selection operator 
@@ -179,7 +178,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.5, 0.5
+CXPB, MUTPB = 0.5, 0.4
 
 
 ########## main() ###########
