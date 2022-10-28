@@ -5,8 +5,6 @@ from math import pow
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from functools import partial
-
 
 
 ########### Init ###########
@@ -23,17 +21,17 @@ xy_corn = pd.read_csv('CustXY_WHCorner.csv')
 
 # Number of costumers
 #n_costumers = 10
-n_costumers = 30 #Truck has to go to the warehouse once
-#n_costumers = 50 #Truck has to go to the warehouse twice
+n_costumers = 30 + 1 #Truck has to go to the warehouse once
+#n_costumers = 50 + 2 #Truck has to go to the warehouse twice
 
 # Total number of products per 50 costumers
 #print(sum(cust_ord['Orders'])) 
 
 # Number of genarations
-n_genarations = 200
+n_genarations = 100
 
 # Max number of the population
-n_population = 50
+n_population = 100
 
 if (n_population*n_genarations) > 100000:
     print('ERROR: Maximum number of evaluations has exceeded')
@@ -53,7 +51,9 @@ dist= np.delete(dist, 0, axis=1)'''
 def Create_Genes():
     
     gene = np.random.permutation(n_costumers+1)
-    gene = np.delete(gene, np.where(gene==0)[0], axis=0)
+    
+    if n_costumers == 10: 
+        gene = np.delete(gene, np.where(gene==0)[0], axis=0)
     
     return gene
 
@@ -74,25 +74,27 @@ def plot_costumer_location(xy, max_client):
 # Cost fuction we want to minimize
 # Hard restriction: Truck max capacity = 1000 products    
 def Cost_Function(individual):
-        
-    capacity = 1000    
+    
     distances = []
     distances.append(dist[0,individual[0]]) # Distance between the warehouse and the first client
     
     for i in range (len(individual)-1):
-        capacity -= cust_ord['Orders'][individual[i]]
-        # Try to simulate the truck going to zero 
-        if cust_ord['Orders'][individual[i+1]] > capacity or capacity == 0:
-            distances.append(dist[individual[i],individual[0]]) # Truck has to go to from client i to warehouse
-            distances.append(dist[0,individual[i+1]])  # And then from the ware house to client i+1
-            capacity = 1000 # Full capacity again
-            continue
-        # Distance between each costumer in our possible solution
-        distances.append(dist[individual[i], individual[i+1]]) 
-
+        distances.append(dist[individual[i], individual[i+1]]) # Distance between each costumer in our possible solution
+    
     distances.append(dist[individual[int(len(individual)-1)],0])
     
     return sum(distances),
+
+def Check_Capacity(individual):
+    
+    capacity = 1000    
+    capacity -= cust_ord['Orders'][individual[0]]
+    
+    for i in range (len(individual)-1):
+        if(cust_ord['Orders'][individual[i+1]] > capacity): return False
+        capacity -= cust_ord['Orders'][individual[i+1]]     
+    
+    return True
 
 def check_feasiblity(individual):
     '''
@@ -102,7 +104,8 @@ def check_feasiblity(individual):
     '''
     # Indiviual contains repeated values
     if (len(set(individual)) != len(individual)): return False
-    else: return True
+    if (Check_Capacity(individual=individual) == False): return False
+    return True
 
 
 def penalty_fxn(individual):
@@ -111,7 +114,8 @@ def penalty_fxn(individual):
     It is assumed that if the output of this function is added to the objective function fitness values,
     the individual has violated the constraint.
     '''
-    return pow(int(Cost_Function(individual=individual)[0]),3)
+    #if (Check_Capacity(individual=individual) == False): return int(Cost_Function(individual=individual)[0])*2
+    return pow(int(Cost_Function(individual=individual)[0]),2)
 
 # Funtion to save statistics across diferent generations
 def SaveSatistics(individual):
@@ -141,8 +145,6 @@ toolbox.register("Genes", Create_Genes)
 # (5)
 # Register the individuals
 toolbox.register("individual", tools.initIterate, creator.Individual,toolbox.Genes) 
-#toolbox.register("individual", tools.initIterate, creator.Individual, partial(random.sample, range(n_costumers), n_costumers))
-
 
 # (6)
 # Register Population
@@ -150,11 +152,11 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 # (7)
 # Crossover operator
-toolbox.register("mate", tools.cxOrdered)
+toolbox.register("mate", tools.cxTwoPoints)
 
 # (8)
 # Mutation operator
-toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
+toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.1)
 
 # (9)
 # Selection operator 
@@ -187,7 +189,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.3, 0.4
+CXPB, MUTPB = 0.5, 0.5
 
 
 ########## main() ###########

@@ -5,8 +5,6 @@ from math import pow
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from functools import partial
-
 
 
 ########### Init ###########
@@ -30,10 +28,10 @@ n_costumers = 30 #Truck has to go to the warehouse once
 #print(sum(cust_ord['Orders'])) 
 
 # Number of genarations
-n_genarations = 200
+n_genarations = 100
 
 # Max number of the population
-n_population = 50
+n_population = 100
 
 if (n_population*n_genarations) > 100000:
     print('ERROR: Maximum number of evaluations has exceeded')
@@ -86,9 +84,8 @@ def Cost_Function(individual):
             distances.append(dist[individual[i],individual[0]]) # Truck has to go to from client i to warehouse
             distances.append(dist[0,individual[i+1]])  # And then from the ware house to client i+1
             capacity = 1000 # Full capacity again
-            continue
-        # Distance between each costumer in our possible solution
-        distances.append(dist[individual[i], individual[i+1]]) 
+        else: 
+            distances.append(dist[individual[i], individual[i+1]]) 
 
     distances.append(dist[individual[int(len(individual)-1)],0])
     
@@ -141,8 +138,6 @@ toolbox.register("Genes", Create_Genes)
 # (5)
 # Register the individuals
 toolbox.register("individual", tools.initIterate, creator.Individual,toolbox.Genes) 
-#toolbox.register("individual", tools.initIterate, creator.Individual, partial(random.sample, range(n_costumers), n_costumers))
-
 
 # (6)
 # Register Population
@@ -150,7 +145,7 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 # (7)
 # Crossover operator
-toolbox.register("mate", tools.cxOrdered)
+toolbox.register("mate", tools.cxOnePoint)
 
 # (8)
 # Mutation operator
@@ -187,7 +182,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.3, 0.4
+CXPB, MUTPB = 0.2, 0.4
 
 
 ########## main() ###########

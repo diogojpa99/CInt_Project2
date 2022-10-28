@@ -30,10 +30,10 @@ n_costumers = 30 #Truck has to go to the warehouse once
 #print(sum(cust_ord['Orders'])) 
 
 # Number of genarations
-n_genarations = 200
+n_genarations = 250 #100
 
 # Max number of the population
-n_population = 50
+n_population = 40 #100
 
 if (n_population*n_genarations) > 100000:
     print('ERROR: Maximum number of evaluations has exceeded')
@@ -74,7 +74,8 @@ def plot_costumer_location(xy, max_client):
 # Cost fuction we want to minimize
 # Hard restriction: Truck max capacity = 1000 products    
 def Cost_Function(individual):
-        
+
+    individual = [x + 1 for x in individual]
     capacity = 1000    
     distances = []
     distances.append(dist[0,individual[0]]) # Distance between the warehouse and the first client
@@ -136,13 +137,11 @@ toolbox = base.Toolbox()
 # Register Genes
 # The genes will be a list of a possible path
 # Were each index is a costumer
-toolbox.register("Genes", Create_Genes)
+toolbox.register("Genes", np.random.permutation, n_costumers)
 
 # (5)
 # Register the individuals
 toolbox.register("individual", tools.initIterate, creator.Individual,toolbox.Genes) 
-#toolbox.register("individual", tools.initIterate, creator.Individual, partial(random.sample, range(n_costumers), n_costumers))
-
 
 # (6)
 # Register Population
@@ -158,7 +157,7 @@ toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
 
 # (9)
 # Selection operator 
-toolbox.register("select", tools.selTournament, tournsize = 5)
+toolbox.register("select", tools.selTournament, tournsize = 8)
 
 # (10)
 # Solution Evaluation
@@ -187,8 +186,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.3, 0.4
-
+CXPB, MUTPB = 0.7, 0.7
 
 ########## main() ###########
 def main():
@@ -207,7 +205,8 @@ def main():
                                       stats=stats, ngen=n_genarations, halloffame=hof, verbose=True)
 
     #print('Result:', result)
-    print('Hall Of Fame:', hof)
+    real_hof = [x + 1 for x in hof[0]]
+    print('Hall Of Fame:',real_hof)
     print ("Time Used ---> ", time.process_time() - start_time1, "seconds")
 
     plot_costumer_location(xy=xy_cent, max_client=n_costumers+1)

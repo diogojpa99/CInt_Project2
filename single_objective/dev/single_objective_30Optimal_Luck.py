@@ -136,12 +136,12 @@ toolbox = base.Toolbox()
 # Register Genes
 # The genes will be a list of a possible path
 # Were each index is a costumer
-toolbox.register("Genes", Create_Genes)
+#toolbox.register("Genes", Create_Genes)
 
 # (5)
 # Register the individuals
-toolbox.register("individual", tools.initIterate, creator.Individual,toolbox.Genes) 
-#toolbox.register("individual", tools.initIterate, creator.Individual, partial(random.sample, range(n_costumers), n_costumers))
+#toolbox.register("individual", tools.initIterate, creator.Individual,toolbox.Genes) 
+toolbox.register("individual", tools.initIterate, creator.Individual, partial(random.sample, range(n_costumers), n_costumers))
 
 
 # (6)

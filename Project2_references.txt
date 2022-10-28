@@ -1,0 +1,17 @@
+References:
+
+https://deap.readthedocs.io/en/master/api/tools.html
+Example: https://www.youtube.com/watch?v=kTSZ-QPBVD4&ab_channel=LIITUFG
+
+Constraints Handling:
+https://deap.readthedocs.io/en/master/tutorials/advanced/constraints.html
+https://aviral-agarwal.medium.com/implementation-of-genetic-algorithm-evolutionary-algorithm-in-python-using-deap-framework-c2d4bd247f70
+
+More examples:
+https://medium.com/@pasdan/genetic-algorithm-the-travelling-salesman-problem-via-python-deap-f238e0dd1a73
+https://github.com/DEAP/deap/blob/master/examples/ga/tsp.py
+https://www.geeksforgeeks.org/traveling-salesman-problem-tsp-implementation/
+https://jaketae.github.io/study/genetic-algorithm/
+https://www.geeksforgeeks.org/traveling-salesman-problem-using-genetic-algorithm/
+https://towardsdatascience.com/evolution-of-a-salesman-a-complete-genetic-algorithm-tutorial-for-python-6fe5d2b3ca35
+https://levelup.gitconnected.com/how-to-implement-a-traveling-salesman-problem-genetic-algorithm-in-python-ea32c7bef20f
