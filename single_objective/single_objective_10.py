@@ -20,18 +20,18 @@ dists_corn = pd.read_csv('CustDist_WHCorner.csv')
 xy_corn = pd.read_csv('CustXY_WHCorner.csv')
 
 # Number of costumers
-#n_costumers = 10
-n_costumers = 30 #Truck has to go to the warehouse once
-#n_costumers = 50 #Truck has to go to the warehouse twice
+n_costumers = 10
+#n_costumers = 30 
+#n_costumers = 50
 
 # Total number of products per 50 costumers
 #print(sum(cust_ord['Orders'])) 
 
 # Number of genarations
-n_genarations = 250 #100
+n_genarations = 100
 
 # Max number of the population
-n_population = 40 #100
+n_population = 100
 
 if (n_population*n_genarations) > 100000:
     print('ERROR: Maximum number of evaluations has exceeded')
@@ -103,7 +103,7 @@ def penalty_fxn(individual):
     It is assumed that if the output of this function is added to the objective function fitness values,
     the individual has violated the constraint.
     '''
-    return pow(int(Cost_Function(individual=individual)[0]),3)
+    return pow(int(Cost_Function(individual=individual)[0]),2)
 
 # Funtion to save statistics across diferent generations
 def SaveSatistics(individual):
@@ -140,7 +140,7 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 # (7)
 # Crossover operator
-toolbox.register("mate", tools.cxTwoPoints)
+toolbox.register("mate", tools.cxOrdered)
 
 # (8)
 # Mutation operator
@@ -148,7 +148,7 @@ toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
 
 # (9)
 # Selection operator 
-toolbox.register("select", tools.selTournament, tournsize = 8)
+toolbox.register("select", tools.selTournament, tournsize = 4)
 
 # (10)
 # Solution Evaluation
@@ -177,7 +177,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.75, 0.75
+CXPB, MUTPB = 0.5, 0.4
 
 ########## main() ###########
 def main():
