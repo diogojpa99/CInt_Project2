@@ -43,8 +43,8 @@ dist = dists_cent.to_numpy()
 dist= np.delete(dist, 0, axis=1)
 
 # Dist_corn 'preprocessing'
-dist = dists_corn.to_numpy()
-dist= np.delete(dist, 0, axis=1)
+'''dist = dists_corn.to_numpy()
+dist= np.delete(dist, 0, axis=1)'''
 
 ########### Functions ############
 

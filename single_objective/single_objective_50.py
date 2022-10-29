@@ -39,14 +39,28 @@ if (n_population*n_genarations) > 100000:
     
 # Dist_cent 'preprocessing'
 #print(dists_cent)
-dist = dists_cent.to_numpy()
-dist= np.delete(dist, 0, axis=1)
-
-# Dist_corn 'preprocessing'
-'''dist = dists_corn.to_numpy()
+'''dist = dists_cent.to_numpy()
 dist= np.delete(dist, 0, axis=1)'''
 
+# Dist_corn 'preprocessing'
+dist = dists_corn.to_numpy()
+dist= np.delete(dist, 0, axis=1)
+
 ########### Functions ############
+
+# Plot Costumer location
+def plot_costumer_location_corn(xy, max_client):
+    
+    fig, ax = plt.subplots()
+    ax.scatter(xy['x'][0:max_client],  xy['y'][0:max_client])
+    ax.scatter(xy['y'][0], xy['y'][0], c = '#d62728' , label = "Warehouse")
+    
+    for i, txt in enumerate(xy['Customer XY'][0:max_client]):
+        ax.annotate(txt, (xy['x'][i], xy['y'][i]))
+    
+    plt.show()
+        
+    return
 
 # Plot Costumer location
 def plot_costumer_location(xy, max_client):
@@ -198,8 +212,8 @@ def main():
     print('Hall Of Fame:',real_hof)
     print ("Time Used ---> ", time.process_time() - start_time1, "seconds")
 
-    plot_costumer_location(xy=xy_cent, max_client=n_costumers+1)
-    
+    #plot_costumer_location(xy=xy_cent, max_client=n_costumers+1)
+    plot_costumer_location_corn(xy=xy_corn, max_client=n_costumers+1)
     return
 
 if __name__ == "__main__":
