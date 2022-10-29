@@ -43,13 +43,13 @@ dist = dists_cent.to_numpy()
 dist= np.delete(dist, 0, axis=1)
 
 # Dist_corn 'preprocessing'
-'''dist = dists_corn.to_numpy()
-dist= np.delete(dist, 0, axis=1)'''
+dist = dists_corn.to_numpy()
+dist= np.delete(dist, 0, axis=1)
 
 ########### Functions ############
 
 # Plot Costumer location
-def plot_costumer_location(xy, max_client):
+def plot_costumer_location_cent(xy, max_client):
     
     fig, ax = plt.subplots()
     ax.scatter(xy['X'][0:max_client],  xy['Y'][0:max_client])
@@ -57,6 +57,20 @@ def plot_costumer_location(xy, max_client):
     
     for i, txt in enumerate(xy['Customer XY'][0:max_client]):
         ax.annotate(txt, (xy['X'][i], xy['Y'][i]))
+    
+    plt.show()
+        
+    return
+
+# Plot Costumer location
+def plot_costumer_location_corn(xy, max_client):
+    
+    fig, ax = plt.subplots()
+    ax.scatter(xy['x'][0:max_client],  xy['y'][0:max_client])
+    ax.scatter(xy['y'][0], xy['y'][0], c = '#d62728' , label = "Warehouse")
+    
+    for i, txt in enumerate(xy['Customer XY'][0:max_client]):
+        ax.annotate(txt, (xy['x'][i], xy['y'][i]))
     
     plt.show()
         
@@ -72,15 +86,13 @@ def Cost_Function(individual):
     distances.append(dist[0,individual[0]]) # Distance between the warehouse and the first client
     
     for i in range (len(individual)-1):
-        capacity -= cust_ord['Orders'][individual[i]]
+        capacity -= 50
         # Try to simulate the truck going to zero 
-        if cust_ord['Orders'][individual[i+1]] > capacity or capacity == 0:
+        if capacity < 50:
             distances.append(dist[individual[i],individual[0]]) # Truck has to go to from client i to warehouse
             distances.append(dist[0,individual[i+1]])  # And then from the ware house to client i+1
             capacity = 1000 # Full capacity again
-            continue
-        # Distance between each costumer in our possible solution
-        distances.append(dist[individual[i], individual[i+1]]) 
+        else: distances.append(dist[individual[i], individual[i+1]]) 
 
     distances.append(dist[individual[int(len(individual)-1)],0])
     
@@ -110,6 +122,8 @@ def SaveSatistics(individual):
     return individual.fitness.values
 
 ########### Initializations ############
+
+print(xy_corn.columns)
 
 # (1)
 # Objective: Minimize a Cost Fuction
@@ -148,7 +162,7 @@ toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
 
 # (9)
 # Selection operator 
-toolbox.register("select", tools.selTournament, tournsize = 4)
+toolbox.register("select", tools.selTournament, tournsize = 5)
 
 # (10)
 # Solution Evaluation
@@ -177,7 +191,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.5, 0.4
+CXPB, MUTPB = 0.4, 0.4
 
 ########## main() ###########
 def main():
@@ -199,8 +213,9 @@ def main():
     real_hof = [x + 1 for x in hof[0]]
     print('Hall Of Fame:',real_hof)
     print ("Time Used ---> ", time.process_time() - start_time1, "seconds")
+    
+    plot_costumer_location_corn(xy=xy_corn, max_client=n_costumers+1)
 
-    plot_costumer_location(xy=xy_cent, max_client=n_costumers+1)
     
     return
 

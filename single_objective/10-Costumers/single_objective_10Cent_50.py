@@ -9,7 +9,8 @@ import matplotlib.pyplot as plt
 
 ########### Init ###########
 
-cust_ord = pd.read_csv('CustOrd.csv')
+# Each Customer has 50 orders
+#cust_ord = pd.read_csv('CustOrd.csv')
 
 # Centered
 dists_cent = pd.read_csv('CustDist_WHCentral.csv')
@@ -20,18 +21,18 @@ dists_corn = pd.read_csv('CustDist_WHCorner.csv')
 xy_corn = pd.read_csv('CustXY_WHCorner.csv')
 
 # Number of costumers
-#n_costumers = 10
-n_costumers = 30 #Truck has to go to the warehouse once
-#n_costumers = 50 #Truck has to go to the warehouse twice
+n_costumers = 10
+#n_costumers = 30 
+#n_costumers = 50
 
 # Total number of products per 50 costumers
 #print(sum(cust_ord['Orders'])) 
 
 # Number of genarations
-n_genarations = 250 #100
+n_genarations = 100
 
 # Max number of the population
-n_population = 40 #100
+n_population = 100
 
 if (n_population*n_genarations) > 100000:
     print('ERROR: Maximum number of evaluations has exceeded')
@@ -49,7 +50,7 @@ dist= np.delete(dist, 0, axis=1)'''
 ########### Functions ############
 
 # Plot Costumer location
-def plot_costumer_location(xy, max_client):
+def plot_costumer_location_cent(xy, max_client):
     
     fig, ax = plt.subplots()
     ax.scatter(xy['X'][0:max_client],  xy['Y'][0:max_client])
@@ -57,6 +58,20 @@ def plot_costumer_location(xy, max_client):
     
     for i, txt in enumerate(xy['Customer XY'][0:max_client]):
         ax.annotate(txt, (xy['X'][i], xy['Y'][i]))
+    
+    plt.show()
+        
+    return
+
+# Plot Costumer location
+def plot_costumer_location_corn(xy, max_client):
+    
+    fig, ax = plt.subplots()
+    ax.scatter(xy['x'][0:max_client],  xy['y'][0:max_client])
+    ax.scatter(xy['y'][0], xy['y'][0], c = '#d62728' , label = "Warehouse")
+    
+    for i, txt in enumerate(xy['Customer XY'][0:max_client]):
+        ax.annotate(txt, (xy['x'][i], xy['y'][i]))
     
     plt.show()
         
@@ -72,9 +87,9 @@ def Cost_Function(individual):
     distances.append(dist[0,individual[0]]) # Distance between the warehouse and the first client
     
     for i in range (len(individual)-1):
-        capacity -= cust_ord['Orders'][individual[i]]
+        capacity -= 50 
         # Try to simulate the truck going to zero 
-        if cust_ord['Orders'][individual[i+1]] > capacity or capacity == 0:
+        if capacity < 50:
             distances.append(dist[individual[i],individual[0]]) # Truck has to go to from client i to warehouse
             distances.append(dist[0,individual[i+1]])  # And then from the ware house to client i+1
             capacity = 1000 # Full capacity again
@@ -101,13 +116,15 @@ def penalty_fxn(individual):
     It is assumed that if the output of this function is added to the objective function fitness values,
     the individual has violated the constraint.
     '''
-    return pow(int(Cost_Function(individual=individual)[0]),3)
+    return pow(int(Cost_Function(individual=individual)[0]),2)
 
 # Funtion to save statistics across diferent generations
 def SaveSatistics(individual):
     return individual.fitness.values
 
 ########### Initializations ############
+
+print(xy_corn.columns)
 
 # (1)
 # Objective: Minimize a Cost Fuction
@@ -138,7 +155,7 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 # (7)
 # Crossover operator
-toolbox.register("mate", tools.cxTwoPoints)
+toolbox.register("mate", tools.cxOrdered)
 
 # (8)
 # Mutation operator
@@ -146,7 +163,7 @@ toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
 
 # (9)
 # Selection operator 
-toolbox.register("select", tools.selTournament, tournsize = 8)
+toolbox.register("select", tools.selTournament, tournsize = 4)
 
 # (10)
 # Solution Evaluation
@@ -175,7 +192,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.75, 0.75
+CXPB, MUTPB = 0.5, 0.4
 
 ########## main() ###########
 def main():
@@ -198,7 +215,6 @@ def main():
     print('Hall Of Fame:',real_hof)
     print ("Time Used ---> ", time.process_time() - start_time1, "seconds")
 
-    plot_costumer_location(xy=xy_cent, max_client=n_costumers+1)
     
     return
 

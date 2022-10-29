@@ -78,9 +78,7 @@ def Cost_Function(individual):
             distances.append(dist[individual[i],individual[0]]) # Truck has to go to from client i to warehouse
             distances.append(dist[0,individual[i+1]])  # And then from the ware house to client i+1
             capacity = 1000 # Full capacity again
-            continue
-        # Distance between each costumer in our possible solution
-        distances.append(dist[individual[i], individual[i+1]]) 
+        else: distances.append(dist[individual[i], individual[i+1]]) 
 
     distances.append(dist[individual[int(len(individual)-1)],0])
     
