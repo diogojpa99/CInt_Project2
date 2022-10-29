@@ -21,17 +21,17 @@ xy_corn = pd.read_csv('CustXY_WHCorner.csv')
 
 # Number of costumers
 #n_costumers = 10
-n_costumers = 30 
-#n_costumers = 50
+#n_costumers = 30 
+n_costumers = 50
 
 # Total number of products per 50 costumers
 #print(sum(cust_ord['Orders'])) 
 
 # Number of genarations
-n_genarations = 100
+n_genarations = 250
 
 # Max number of the population
-n_population = 100
+n_population = 40
 
 if (n_population*n_genarations) > 100000:
     print('ERROR: Maximum number of evaluations has exceeded')
@@ -86,9 +86,9 @@ def Cost_Function(individual):
     distances.append(dist[0,individual[0]]) # Distance between the warehouse and the first client
     
     for i in range (len(individual)-1):
-        capacity -= 50
+        capacity -= cust_ord['Orders'][individual[i]]
         # Try to simulate the truck going to zero 
-        if capacity < 50:
+        if cust_ord['Orders'][individual[i+1]] > capacity or capacity == 0:
             distances.append(dist[individual[i],individual[0]]) # Truck has to go to from client i to warehouse
             distances.append(dist[0,individual[i+1]])  # And then from the ware house to client i+1
             capacity = 1000 # Full capacity again
@@ -160,7 +160,7 @@ toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
 
 # (9)
 # Selection operator 
-toolbox.register("select", tools.selTournament, tournsize = 9)
+toolbox.register("select", tools.selTournament, tournsize = 25)
 
 # (10)
 # Solution Evaluation
@@ -189,7 +189,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.8, 0.8
+CXPB, MUTPB = 0.7, 0.7
 
 ########## main() ###########
 def main():
@@ -226,7 +226,7 @@ def main():
         
     print('MEAN:', np.mean(min_array))
     print('STD:', np.std(min_array))
-    np.save('30-Costumers/stats/WHCorner_Ord50best.npy', best_run)
+    np.save('50-Costumers/stats/WHCorner_OrdFilebest.npy', best_run)
     
     return
 

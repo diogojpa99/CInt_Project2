@@ -29,10 +29,10 @@ n_costumers = 30
 #print(sum(cust_ord['Orders'])) 
 
 # Number of genarations
-n_genarations = 250
+n_genarations = 100
 
 # Max number of the population
-n_population = 40
+n_population = 100
 
 if (n_population*n_genarations) > 100000:
     print('ERROR: Maximum number of evaluations has exceeded')
@@ -157,7 +157,7 @@ toolbox.register("mate", tools.cxOrdered)
 
 # (8)
 # Mutation operator
-toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
+toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.01)
 
 # (9)
 # Selection operator 
@@ -190,7 +190,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.7, 0.7
+CXPB, MUTPB = 0.8, 0.8
 
 ########## main() ###########
 def main():

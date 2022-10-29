@@ -89,7 +89,6 @@ def Cost_Function(individual):
         capacity -= cust_ord['Orders'][individual[i]]
         # Try to simulate the truck going to zero 
         if cust_ord['Orders'][individual[i+1]] > capacity or capacity == 0:
-            print('SHITTT')
             distances.append(dist[individual[i],individual[0]]) # Truck has to go to from client i to warehouse
             distances.append(dist[0,individual[i+1]])  # And then from the ware house to client i+1
             capacity = 1000 # Full capacity again
