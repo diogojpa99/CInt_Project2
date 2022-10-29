@@ -9,8 +9,7 @@ import matplotlib.pyplot as plt
 
 ########### Init ###########
 
-# Each Customer has 50 orders
-#cust_ord = pd.read_csv('CustOrd.csv')
+cust_ord = pd.read_csv('CustOrd.csv')
 
 # Centered
 dists_cent = pd.read_csv('CustDist_WHCentral.csv')
@@ -29,10 +28,10 @@ n_costumers = 10
 #print(sum(cust_ord['Orders'])) 
 
 # Number of genarations
-n_genarations = 250
+n_genarations = 100
 
 # Max number of the population
-n_population = 40
+n_population = 100
 
 if (n_population*n_genarations) > 100000:
     print('ERROR: Maximum number of evaluations has exceeded')
@@ -87,9 +86,9 @@ def Cost_Function(individual):
     distances.append(dist[0,individual[0]]) # Distance between the warehouse and the first client
     
     for i in range (len(individual)-1):
-        capacity -= 50 
+        capacity -= cust_ord['Orders'][individual[i]]
         # Try to simulate the truck going to zero 
-        if capacity < 50:
+        if cust_ord['Orders'][individual[i+1]] > capacity or capacity == 0:
             distances.append(dist[individual[i],individual[0]]) # Truck has to go to from client i to warehouse
             distances.append(dist[0,individual[i+1]])  # And then from the ware house to client i+1
             capacity = 1000 # Full capacity again
@@ -123,6 +122,8 @@ def SaveSatistics(individual):
     return individual.fitness.values
 
 ########### Initializations ############
+
+print(xy_corn.columns)
 
 # (1)
 # Objective: Minimize a Cost Fuction
@@ -195,27 +196,23 @@ CXPB, MUTPB = 0.5, 0.4
 ########## main() ###########
 def main():
     
-    print('----------- single_objective_10Cent_50 -----------')
-    for i in range (30):
+    random.seed(64)
         
-        print('--------------------',i+1,'---------------------')
-        random.seed(i+34)
-            
-        # (16)
-        # Initiate population
-        pop = toolbox.population(n=n_population)
-            
-        start_time1 = time.process_time() # Program time
+    # (16)
+    # Initiate population
+    pop = toolbox.population(n=n_population)
         
-        # (17)
-        # Run evolutionary algorithm
-        result, log = algorithms.eaSimple(population=pop, toolbox=toolbox, cxpb=CXPB, mutpb=MUTPB,
-                                        stats=stats, ngen=n_genarations, halloffame=hof, verbose=False)
+    start_time1 = time.process_time() # Program time
+    
+    # (17)
+    # Run evolutionary algorithm
+    result, log = algorithms.eaSimple(population=pop, toolbox=toolbox, cxpb=CXPB, mutpb=MUTPB,
+                                      stats=stats, ngen=n_genarations, halloffame=hof, verbose=True)
 
-        print('log:', log)
-        real_hof = [x + 1 for x in hof[0]]
-        #print('Hall Of Fame:',real_hof)
-        #print ("Time Used ---> ", time.process_time() - start_time1, "seconds")
+    #print('Result:', result)
+    real_hof = [x + 1 for x in hof[0]]
+    print('Hall Of Fame:',real_hof)
+    print ("Time Used ---> ", time.process_time() - start_time1, "seconds")
 
     
     return
