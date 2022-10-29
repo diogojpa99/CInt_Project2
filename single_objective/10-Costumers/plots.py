@@ -10,7 +10,6 @@ SOP10Corn50 = np.load('10-Costumers/stats/WHCorner_Ord50.npy')
 SOP10CornOrd = np.load('10-Costumers/stats/WHCorner_OrdFile.npy')
 
 
-
 #################### Plots #######################
 
 plt.plot(SOP10Cent50, label = 'WHCentral_Ord50')

@@ -9,8 +9,7 @@ import matplotlib.pyplot as plt
 
 ########### Init ###########
 
-# Each Customer has 50 orders
-#cust_ord = pd.read_csv('CustOrd.csv')
+cust_ord = pd.read_csv('CustOrd.csv')
 
 # Centered
 dists_cent = pd.read_csv('CustDist_WHCentral.csv')
@@ -87,9 +86,10 @@ def Cost_Function(individual):
     distances.append(dist[0,individual[0]]) # Distance between the warehouse and the first client
     
     for i in range (len(individual)-1):
-        capacity -= 50 
+        capacity -= cust_ord['Orders'][individual[i]]
         # Try to simulate the truck going to zero 
-        if capacity < 50:
+        if cust_ord['Orders'][individual[i+1]] > capacity or capacity == 0:
+            print('SHITTT')
             distances.append(dist[individual[i],individual[0]]) # Truck has to go to from client i to warehouse
             distances.append(dist[0,individual[i+1]])  # And then from the ware house to client i+1
             capacity = 1000 # Full capacity again
@@ -108,7 +108,6 @@ def check_feasiblity(individual):
     # Indiviual contains repeated values
     if (len(set(individual)) != len(individual)): return False
     else: return True
-
 
 def penalty_fxn(individual):
     '''
@@ -227,7 +226,7 @@ def main():
         
     print('MEAN:', np.mean(min_array))
     print('STD:', np.std(min_array))
-    np.save('10-Costumers/stats/WHCentral_Ord50best.npy', best_run)
+    np.save('10-Costumers/stats/WHCentral_OrdFilebest.npy', best_run)
     
     return
 

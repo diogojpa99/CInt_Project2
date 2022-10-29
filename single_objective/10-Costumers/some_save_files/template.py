@@ -9,7 +9,8 @@ import matplotlib.pyplot as plt
 
 ########### Init ###########
 
-cust_ord = pd.read_csv('CustOrd.csv')
+# Each Customer has 50 orders
+#cust_ord = pd.read_csv('CustOrd.csv')
 
 # Centered
 dists_cent = pd.read_csv('CustDist_WHCentral.csv')
@@ -43,8 +44,8 @@ dist = dists_cent.to_numpy()
 dist= np.delete(dist, 0, axis=1)
 
 # Dist_corn 'preprocessing'
-dist = dists_corn.to_numpy()
-dist= np.delete(dist, 0, axis=1)
+'''dist = dists_corn.to_numpy()
+dist= np.delete(dist, 0, axis=1)'''
 
 ########### Functions ############
 
@@ -86,9 +87,9 @@ def Cost_Function(individual):
     distances.append(dist[0,individual[0]]) # Distance between the warehouse and the first client
     
     for i in range (len(individual)-1):
-        capacity -= cust_ord['Orders'][individual[i]]
+        capacity -= 50 
         # Try to simulate the truck going to zero 
-        if cust_ord['Orders'][individual[i+1]] > capacity or capacity == 0:
+        if capacity < 50:
             distances.append(dist[individual[i],individual[0]]) # Truck has to go to from client i to warehouse
             distances.append(dist[0,individual[i+1]])  # And then from the ware house to client i+1
             capacity = 1000 # Full capacity again
@@ -122,8 +123,6 @@ def SaveSatistics(individual):
     return individual.fitness.values
 
 ########### Initializations ############
-
-print(xy_corn.columns)
 
 # (1)
 # Objective: Minimize a Cost Fuction
@@ -162,7 +161,7 @@ toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
 
 # (9)
 # Selection operator 
-toolbox.register("select", tools.selTournament, tournsize = 5)
+toolbox.register("select", tools.selTournament, tournsize = 4)
 
 # (10)
 # Solution Evaluation
@@ -191,31 +190,44 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.4, 0.4
+CXPB, MUTPB = 0.5, 0.5
 
 ########## main() ###########
 def main():
     
-    random.seed(64)
-        
-    # (16)
-    # Initiate population
-    pop = toolbox.population(n=n_population)
-        
-    start_time1 = time.process_time() # Program time
+    min_array = []
+    short_dist = 100000
+    best_run = np.empty(n_genarations,)
     
-    # (17)
-    # Run evolutionary algorithm
-    result, log = algorithms.eaSimple(population=pop, toolbox=toolbox, cxpb=CXPB, mutpb=MUTPB,
-                                      stats=stats, ngen=n_genarations, halloffame=hof, verbose=True)
-
-    #print('Result:', result)
-    real_hof = [x + 1 for x in hof[0]]
-    print('Hall Of Fame:',real_hof)
-    print ("Time Used ---> ", time.process_time() - start_time1, "seconds")
-    
-    plot_costumer_location_corn(xy=xy_corn, max_client=n_costumers+1)
-
+    for i in range (30):
+        
+        random.seed(i+34)
+            
+        # (16)
+        # Initiate population
+        pop = toolbox.population(n=n_population)
+            
+        start_time1 = time.process_time() # Program time
+        
+        # (17)
+        # Run evolutionary algorithm
+        result, log = algorithms.eaSimple(population=pop, toolbox=toolbox, cxpb=CXPB, mutpb=MUTPB,
+                                        stats=stats, ngen=n_genarations, halloffame=hof, verbose=False)
+        
+        min_array.append(log[n_genarations]['min'])
+        if log[n_genarations]['min'] < short_dist:
+            for j in range (n_genarations): 
+                best_run[j]=(log[j]['min'])
+            short_dist = log[n_genarations]['min']
+            
+        
+        real_hof = [x + 1 for x in hof[0]]
+        #print('Hall Of Fame:',real_hof)
+        #print ("Time Used ---> ", time.process_time() - start_time1, "seconds")
+        
+    print('MEAN:', np.mean(min_array))
+    print('STD:', np.std(min_array))
+    np.save('10-Costumers/stats/WHCentral_Ord50best.npy', best_run)
     
     return
 

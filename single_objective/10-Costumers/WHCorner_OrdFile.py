@@ -43,8 +43,8 @@ dist = dists_cent.to_numpy()
 dist= np.delete(dist, 0, axis=1)
 
 # Dist_corn 'preprocessing'
-'''dist = dists_corn.to_numpy()
-dist= np.delete(dist, 0, axis=1)'''
+dist = dists_corn.to_numpy()
+dist= np.delete(dist, 0, axis=1)
 
 ########### Functions ############
 
@@ -160,7 +160,7 @@ toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
 
 # (9)
 # Selection operator 
-toolbox.register("select", tools.selTournament, tournsize = 4)
+toolbox.register("select", tools.selTournament, tournsize = 5)
 
 # (10)
 # Solution Evaluation
@@ -189,15 +189,17 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.8, 0.8
+CXPB, MUTPB = 0.5, 0.5
 
 ########## main() ###########
 def main():
     
-    print('----------- single_objective_10Cent_50 -----------')
+    min_array = []
+    short_dist = 100000
+    best_run = np.empty(n_genarations,)
+    
     for i in range (30):
         
-        print('--------------------',i+1,'---------------------')
         random.seed(i+34)
             
         # (16)
@@ -210,15 +212,23 @@ def main():
         # Run evolutionary algorithm
         result, log = algorithms.eaSimple(population=pop, toolbox=toolbox, cxpb=CXPB, mutpb=MUTPB,
                                         stats=stats, ngen=n_genarations, halloffame=hof, verbose=False)
-
-        print('log:', log)
+        
+        min_array.append(log[n_genarations]['min'])
+        if log[n_genarations]['min'] < short_dist:
+            for j in range (n_genarations): 
+                best_run[j]=log[j]['min']
+            short_dist = log[n_genarations]['min']
+            
+        
         real_hof = [x + 1 for x in hof[0]]
         #print('Hall Of Fame:',real_hof)
         #print ("Time Used ---> ", time.process_time() - start_time1, "seconds")
-
+        
+    print('MEAN:', np.mean(min_array))
+    print('STD:', np.std(min_array))
+    np.save('10-Costumers/stats/WHCorner_OrdFilebest.npy', best_run)
     
     return
 
 if __name__ == "__main__":
     main()
-
