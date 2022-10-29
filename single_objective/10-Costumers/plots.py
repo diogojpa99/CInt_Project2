@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 
 ################### Imports ######################
 
-SOP10Cent50 = np.load('10-Costumers/stats/WHCentral_Ord50.npy')
-SOP10CentOrd = np.load('10-Costumers/stats/WHCentral_OrdFile.npy')
-SOP10Corn50 = np.load('10-Costumers/stats/WHCorner_Ord50.npy')
-SOP10CornOrd = np.load('10-Costumers/stats/WHCorner_OrdFile.npy')
+SOP10Cent50 = np.load('10-Costumers/stats/WHCentral_Ord50best.npy')
+SOP10CentOrd = np.load('10-Costumers/stats/WHCentral_OrdFilebest.npy')
+SOP10Corn50 = np.load('10-Costumers/stats/WHCorner_Ord50best.npy')
+SOP10CornOrd = np.load('10-Costumers/stats/WHCorner_OrdFilebest.npy')
 
 
 #################### Plots #######################
