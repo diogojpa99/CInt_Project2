@@ -123,8 +123,6 @@ def SaveSatistics(individual):
 
 ########### Initializations ############
 
-print(xy_corn.columns)
-
 # (1)
 # Objective: Minimize a Cost Fuction
 # i.e. Define the fitness: We want to find the least expensive path
@@ -191,31 +189,36 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.5, 0.4
+CXPB, MUTPB = 0.8, 0.8
 
 ########## main() ###########
 def main():
     
-    random.seed(64)
+    print('----------- single_objective_10Cent_50 -----------')
+    for i in range (30):
         
-    # (16)
-    # Initiate population
-    pop = toolbox.population(n=n_population)
+        print('--------------------',i+1,'---------------------')
+        random.seed(i+34)
+            
+        # (16)
+        # Initiate population
+        pop = toolbox.population(n=n_population)
+            
+        start_time1 = time.process_time() # Program time
         
-    start_time1 = time.process_time() # Program time
-    
-    # (17)
-    # Run evolutionary algorithm
-    result, log = algorithms.eaSimple(population=pop, toolbox=toolbox, cxpb=CXPB, mutpb=MUTPB,
-                                      stats=stats, ngen=n_genarations, halloffame=hof, verbose=True)
+        # (17)
+        # Run evolutionary algorithm
+        result, log = algorithms.eaSimple(population=pop, toolbox=toolbox, cxpb=CXPB, mutpb=MUTPB,
+                                        stats=stats, ngen=n_genarations, halloffame=hof, verbose=False)
 
-    #print('Result:', result)
-    real_hof = [x + 1 for x in hof[0]]
-    print('Hall Of Fame:',real_hof)
-    print ("Time Used ---> ", time.process_time() - start_time1, "seconds")
+        print('log:', log)
+        real_hof = [x + 1 for x in hof[0]]
+        #print('Hall Of Fame:',real_hof)
+        #print ("Time Used ---> ", time.process_time() - start_time1, "seconds")
 
     
     return
 
 if __name__ == "__main__":
     main()
+

@@ -29,10 +29,10 @@ n_costumers = 10
 #print(sum(cust_ord['Orders'])) 
 
 # Number of genarations
-n_genarations = 250
+n_genarations = 100
 
 # Max number of the population
-n_population = 40
+n_population = 100
 
 if (n_population*n_genarations) > 100000:
     print('ERROR: Maximum number of evaluations has exceeded')
