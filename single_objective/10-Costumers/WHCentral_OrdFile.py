@@ -28,10 +28,10 @@ n_costumers = 10
 #print(sum(cust_ord['Orders'])) 
 
 # Number of genarations
-n_genarations = 100
+n_genarations = 40
 
 # Max number of the population
-n_population = 100
+n_population = 250
 
 if (n_population*n_genarations) > 100000:
     print('ERROR: Maximum number of evaluations has exceeded')
@@ -189,7 +189,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.5, 0.5
+CXPB, MUTPB = 0.6, 0.6
 
 ########## main() ###########
 def main():

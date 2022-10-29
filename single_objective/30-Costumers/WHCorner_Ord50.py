@@ -28,10 +28,10 @@ n_costumers = 10
 #print(sum(cust_ord['Orders'])) 
 
 # Number of genarations
-n_genarations = 40
+n_genarations = 100
 
 # Max number of the population
-n_population = 250
+n_population = 100
 
 if (n_population*n_genarations) > 100000:
     print('ERROR: Maximum number of evaluations has exceeded')
@@ -86,9 +86,9 @@ def Cost_Function(individual):
     distances.append(dist[0,individual[0]]) # Distance between the warehouse and the first client
     
     for i in range (len(individual)-1):
-        capacity -= cust_ord['Orders'][individual[i]]
+        capacity -= 50
         # Try to simulate the truck going to zero 
-        if cust_ord['Orders'][individual[i+1]] > capacity or capacity == 0:
+        if capacity < 50:
             distances.append(dist[individual[i],individual[0]]) # Truck has to go to from client i to warehouse
             distances.append(dist[0,individual[i+1]])  # And then from the ware house to client i+1
             capacity = 1000 # Full capacity again
@@ -189,7 +189,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.6, 0.6
+CXPB, MUTPB = 0.5, 0.5
 
 ########## main() ###########
 def main():
@@ -226,7 +226,7 @@ def main():
         
     print('MEAN:', np.mean(min_array))
     print('STD:', np.std(min_array))
-    np.save('10-Costumers/stats/WHCorner_OrdFilebest.npy', best_run)
+    np.save('10-Costumers/stats/WHCorner_Ord50best.npy', best_run)
     
     return
 

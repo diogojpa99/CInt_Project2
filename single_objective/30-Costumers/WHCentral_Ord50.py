@@ -9,7 +9,8 @@ import matplotlib.pyplot as plt
 
 ########### Init ###########
 
-cust_ord = pd.read_csv('CustOrd.csv')
+# Each Customer has 50 orders
+#cust_ord = pd.read_csv('CustOrd.csv')
 
 # Centered
 dists_cent = pd.read_csv('CustDist_WHCentral.csv')
@@ -20,18 +21,18 @@ dists_corn = pd.read_csv('CustDist_WHCorner.csv')
 xy_corn = pd.read_csv('CustXY_WHCorner.csv')
 
 # Number of costumers
-n_costumers = 10
-#n_costumers = 30 
+#n_costumers = 10
+n_costumers = 30 
 #n_costumers = 50
 
 # Total number of products per 50 costumers
 #print(sum(cust_ord['Orders'])) 
 
 # Number of genarations
-n_genarations = 40
+n_genarations = 250
 
 # Max number of the population
-n_population = 250
+n_population = 40
 
 if (n_population*n_genarations) > 100000:
     print('ERROR: Maximum number of evaluations has exceeded')
@@ -43,8 +44,8 @@ dist = dists_cent.to_numpy()
 dist= np.delete(dist, 0, axis=1)
 
 # Dist_corn 'preprocessing'
-dist = dists_corn.to_numpy()
-dist= np.delete(dist, 0, axis=1)
+'''dist = dists_corn.to_numpy()
+dist= np.delete(dist, 0, axis=1)'''
 
 ########### Functions ############
 
@@ -86,9 +87,9 @@ def Cost_Function(individual):
     distances.append(dist[0,individual[0]]) # Distance between the warehouse and the first client
     
     for i in range (len(individual)-1):
-        capacity -= cust_ord['Orders'][individual[i]]
+        capacity -= 50 
         # Try to simulate the truck going to zero 
-        if cust_ord['Orders'][individual[i+1]] > capacity or capacity == 0:
+        if capacity < 50:
             distances.append(dist[individual[i],individual[0]]) # Truck has to go to from client i to warehouse
             distances.append(dist[0,individual[i+1]])  # And then from the ware house to client i+1
             capacity = 1000 # Full capacity again
@@ -160,7 +161,7 @@ toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
 
 # (9)
 # Selection operator 
-toolbox.register("select", tools.selTournament, tournsize = 5)
+toolbox.register("select", tools.selTournament, tournsize = 8)
 
 # (10)
 # Solution Evaluation
@@ -189,7 +190,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.6, 0.6
+CXPB, MUTPB = 0.7, 0.7
 
 ########## main() ###########
 def main():
@@ -226,7 +227,7 @@ def main():
         
     print('MEAN:', np.mean(min_array))
     print('STD:', np.std(min_array))
-    np.save('10-Costumers/stats/WHCorner_OrdFilebest.npy', best_run)
+    np.save('30-Costumers/stats/WHCentral_Ord50best.npy', best_run)
     
     return
 

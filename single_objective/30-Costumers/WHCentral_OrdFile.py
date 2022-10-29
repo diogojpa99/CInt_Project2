@@ -20,18 +20,18 @@ dists_corn = pd.read_csv('CustDist_WHCorner.csv')
 xy_corn = pd.read_csv('CustXY_WHCorner.csv')
 
 # Number of costumers
-n_costumers = 10
-#n_costumers = 30 
+#n_costumers = 10
+n_costumers = 30 
 #n_costumers = 50
 
 # Total number of products per 50 costumers
 #print(sum(cust_ord['Orders'])) 
 
 # Number of genarations
-n_genarations = 40
+n_genarations = 250
 
 # Max number of the population
-n_population = 250
+n_population = 40
 
 if (n_population*n_genarations) > 100000:
     print('ERROR: Maximum number of evaluations has exceeded')
@@ -43,8 +43,8 @@ dist = dists_cent.to_numpy()
 dist= np.delete(dist, 0, axis=1)
 
 # Dist_corn 'preprocessing'
-dist = dists_corn.to_numpy()
-dist= np.delete(dist, 0, axis=1)
+'''dist = dists_corn.to_numpy()
+dist= np.delete(dist, 0, axis=1)'''
 
 ########### Functions ############
 
@@ -89,6 +89,7 @@ def Cost_Function(individual):
         capacity -= cust_ord['Orders'][individual[i]]
         # Try to simulate the truck going to zero 
         if cust_ord['Orders'][individual[i+1]] > capacity or capacity == 0:
+            print('SHITTT')
             distances.append(dist[individual[i],individual[0]]) # Truck has to go to from client i to warehouse
             distances.append(dist[0,individual[i+1]])  # And then from the ware house to client i+1
             capacity = 1000 # Full capacity again
@@ -107,7 +108,6 @@ def check_feasiblity(individual):
     # Indiviual contains repeated values
     if (len(set(individual)) != len(individual)): return False
     else: return True
-
 
 def penalty_fxn(individual):
     '''
@@ -160,7 +160,7 @@ toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
 
 # (9)
 # Selection operator 
-toolbox.register("select", tools.selTournament, tournsize = 5)
+toolbox.register("select", tools.selTournament, tournsize = 8)
 
 # (10)
 # Solution Evaluation
@@ -189,7 +189,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.6, 0.6
+CXPB, MUTPB = 0.75, 0.75
 
 ########## main() ###########
 def main():
@@ -226,7 +226,7 @@ def main():
         
     print('MEAN:', np.mean(min_array))
     print('STD:', np.std(min_array))
-    np.save('10-Costumers/stats/WHCorner_OrdFilebest.npy', best_run)
+    np.save('10-Costumers/stats/WHCentral_OrdFilebest.npy', best_run)
     
     return
 
