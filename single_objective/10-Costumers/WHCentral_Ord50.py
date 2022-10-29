@@ -227,7 +227,7 @@ def main():
         
     print('MEAN:', np.mean(min_array))
     print('STD:', np.std(min_array))
-    np.save('10-Costumers/SOP10Cent50best2.npy', best_run)
+    np.save('10-Costumers/stats/WHCentral_Ord50best.npy', best_run)
     
     return
 
