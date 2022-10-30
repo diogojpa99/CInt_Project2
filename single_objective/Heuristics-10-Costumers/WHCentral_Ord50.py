@@ -5,6 +5,8 @@ from math import pow
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from functools import partial
+
 
 
 ########### Init ###########
@@ -77,14 +79,54 @@ def plot_costumer_location_corn(xy, max_client):
         
     return
 
+# Euristics Individual
+def Heuristics_individual_cent(n_customer):
+
+    indiv = []
+    xy_cust = xy_cent[xy_cent['Customer XY'] < n_customer+1]
+    xy_cust = xy_cust.drop(0)
+        
+    # (1)
+    # Spilt the x axis in half
+    #horiz_mid = (max(xy['X'])+min(xy['X']))/2
+    horiz_mid = 50
+    
+    # (2)
+    # Split the population in two: left and right
+    left_cust = xy_cust[xy_cust['X'] < horiz_mid]
+    right_cust = xy_cust[xy_cust['X'] >= horiz_mid]
+    
+    # (3)
+    # Start with the customers from the left side: Down -> Up
+    left_cust = left_cust.sort_values(by=['Y'])
+    indiv = left_cust['Customer XY'].values
+
+    # (4)
+    # Customers in the right side: Up -> Down
+    right_cust = right_cust.sort_values(by=['Y'], ascending=False)
+    indiv = np.concatenate((indiv,right_cust['Customer XY'].values), axis = None)
+    
+    #print(indiv)
+    #plot_costumer_location_cent(xy=xy,max_client=n_customer+1)
+    
+    indiv = [x - 1 for x in indiv]
+    
+    return indiv
+
 # Cost fuction we want to minimize
 # Hard restriction: Truck max capacity = 1000 products    
 def Cost_Function(individual):
-
+    
     individual = [x + 1 for x in individual]
     capacity = 1000    
     distances = []
     distances.append(dist[0,individual[0]]) # Distance between the warehouse and the first client
+    
+    aux = Heuristics_individual_cent(n_customer=n_customers)
+    aux = [x + 1 for x in aux]
+    
+    if (individual == aux): 
+        print('YESSS:', individual)
     
     for i in range (len(individual)-1):
         capacity -= 50 
@@ -121,38 +163,6 @@ def penalty_fxn(individual):
 def SaveSatistics(individual):
     return individual.fitness.values
 
-# Euristics Individual
-def Heuristics_individual_cent(n_customer, xy):
-
-    indiv = []
-    xy_cust = xy[xy['Customer XY'] < n_customers+1]
-    xy_cust = xy_cust.drop(0)
-        
-    # (1)
-    # Spilt the x axis in half
-    #horiz_mid = (max(xy['X'])+min(xy['X']))/2
-    horiz_mid = 50
-    
-    # (2)
-    # Split the population in two: left and right
-    left_cust = xy_cust[xy_cust['X'] < horiz_mid]
-    right_cust = xy_cust[xy_cust['X'] >= horiz_mid]
-    
-    # (3)
-    # Start with the customers from the left side: Down -> Up
-    left_cust = left_cust.sort_values(by=['Y'])
-    indiv = left_cust['Customer XY'].values
-
-    # (4)
-    # Customers in the right side: Up -> Down
-    right_cust = right_cust.sort_values(by=['Y'], ascending=False)
-    indiv = np.concatenate((indiv,right_cust['Customer XY'].values), axis = None)
-    
-    #print(indiv)
-    #plot_costumer_location_cent(xy=xy,max_client=n_customer+1)
-    
-    return indiv
-
 ########### Initializations ############
 
 # (1)
@@ -173,11 +183,13 @@ toolbox = base.Toolbox()
 # The genes will be a list of a possible path
 # Were each index is a costumer
 toolbox.register("Genes", np.random.permutation, n_customers)
+toolbox.register("Gene_heuristic",  partial(Heuristics_individual_cent,n_customers))
+
 
 # (5)
 # Register the individuals
 toolbox.register("individual", tools.initIterate, creator.Individual,toolbox.Genes) 
-toolbox.register("individual_heuristic", tools.initIterate, creator.Individual, Heuristics_individual_cent(n_customer=n_customers,xy=xy_cent))
+toolbox.register("individual_heuristic", tools.initIterate, creator.Individual, toolbox.Gene_heuristic)
 
 # (6)
 # Register Population
@@ -233,12 +245,17 @@ def main():
     
     for i in range (30):
         
+        print('-------------',i+1,'----------------')
+        
         random.seed(i+34)
             
         # (16)
         # Initiate population
         pop = toolbox.population(n=n_population)
-            
+        #Include heuristics individual in population
+        heuris_indv = toolbox.individual_heuristic()
+        pop[0] = heuris_indv 
+    
         start_time1 = time.process_time() # Program time
         
         # (17)
@@ -259,8 +276,7 @@ def main():
         
     print('MEAN:', np.mean(min_array))
     print('STD:', np.std(min_array))
-    print('Heuristics Path:', Heuristics_individual_cent(n_customer=n_customers,xy=xy_cent), 
-          '| Distance: ', Cost_Function(Heuristics_individual_cent(n_customer=n_customers,xy=xy_cent))[0])
+    print('Heuristics Path:', heuris_indv, '| Distance: ', Cost_Function(heuris_indv)[0])
     np.save('Heuristics-10-Costumers/stats/WHCentral_Ord50best.npy', best_run)
     
     return

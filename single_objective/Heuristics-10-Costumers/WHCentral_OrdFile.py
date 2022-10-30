@@ -20,9 +20,9 @@ dists_corn = pd.read_csv('CustDist_WHCorner.csv')
 xy_corn = pd.read_csv('CustXY_WHCorner.csv')
 
 # Number of costumers
-n_costumers = 10
-#n_costumers = 30 
-#n_costumers = 50
+n_customers = 10
+#n_customers = 30 
+#n_customers = 50
 
 # Total number of products per 50 costumers
 #print(sum(cust_ord['Orders'])) 
@@ -120,6 +120,38 @@ def penalty_fxn(individual):
 def SaveSatistics(individual):
     return individual.fitness.values
 
+# Euristics Individual
+def Heuristics_individual_cent(n_customer, xy):
+
+    indiv = []
+    xy_cust = xy[xy['Customer XY'] < n_customers+1]
+    xy_cust = xy_cust.drop(0)
+        
+    # (1)
+    # Spilt the x axis in half
+    #horiz_mid = (max(xy['X'])+min(xy['X']))/2
+    horiz_mid = 50
+    
+    # (2)
+    # Split the population in two: left and right
+    left_cust = xy_cust[xy_cust['X'] < horiz_mid]
+    right_cust = xy_cust[xy_cust['X'] >= horiz_mid]
+    
+    # (3)
+    # Start with the customers from the left side: Down -> Up
+    left_cust = left_cust.sort_values(by=['Y'])
+    indiv = left_cust['Customer XY'].values
+
+    # (4)
+    # Customers in the right side: Up -> Down
+    right_cust = right_cust.sort_values(by=['Y'], ascending=False)
+    indiv = np.concatenate((indiv,right_cust['Customer XY'].values), axis = None)
+    
+    #print(indiv)
+    #plot_costumer_location_cent(xy=xy,max_client=n_customer+1)
+    
+    return indiv
+
 ########### Initializations ############
 
 # (1)
@@ -139,11 +171,13 @@ toolbox = base.Toolbox()
 # Register Genes
 # The genes will be a list of a possible path
 # Were each index is a costumer
-toolbox.register("Genes", np.random.permutation, n_costumers)
+toolbox.register("Genes", np.random.permutation, n_customers)
 
 # (5)
 # Register the individuals
 toolbox.register("individual", tools.initIterate, creator.Individual,toolbox.Genes) 
+toolbox.register("individual_heuristic", tools.initIterate, creator.Individual, 
+                 Heuristics_individual_cent(n_customer=n_customers,xy=xy_cent))
 
 # (6)
 # Register Population
@@ -225,6 +259,8 @@ def main():
         
     print('MEAN:', np.mean(min_array))
     print('STD:', np.std(min_array))
+    print('Heuristics Path:', Heuristics_individual_cent(n_customer=n_customers,xy=xy_cent), 
+        '| Distance: ', Cost_Function(Heuristics_individual_cent(n_customer=n_customers,xy=xy_cent))[0])
     np.save('10-Costumers/stats/WHCentral_OrdFilebest.npy', best_run)
     
     return
