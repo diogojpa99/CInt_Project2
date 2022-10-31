@@ -10,23 +10,13 @@ import matplotlib.pyplot as plt
 ########### Init ###########
 
 # Each Customer has 50 orders
-#cust_ord = pd.read_csv('CustOrd.csv')
 
 # Centered
 dists_cent = pd.read_csv('CustDist_WHCentral.csv')
 xy_cent = pd.read_csv('CustXY_WHCentral.csv')
 
-# Not Centered
-dists_corn = pd.read_csv('CustDist_WHCorner.csv')
-xy_corn = pd.read_csv('CustXY_WHCorner.csv')
-
 # Number of costumers
-n_costumers = 10
-#n_costumers = 30 
-#n_costumers = 50
-
-# Total number of products per 50 costumers
-#print(sum(cust_ord['Orders'])) 
+n_customers = 10
 
 # Number of genarations
 n_genarations = 40
@@ -39,19 +29,15 @@ if (n_population*n_genarations) > 100000:
     exit(0)
     
 # Dist_cent 'preprocessing'
-#print(dists_cent)
 dist = dists_cent.to_numpy()
 dist= np.delete(dist, 0, axis=1)
 
-# Dist_corn 'preprocessing'
-'''dist = dists_corn.to_numpy()
-dist= np.delete(dist, 0, axis=1)'''
-
 ########### Functions ############
 
-# Plot Costumer location
 def plot_costumer_location_cent(xy, max_client):
-    
+    '''
+    Plot Customer location 
+    '''
     fig, ax = plt.subplots()
     ax.scatter(xy['X'][0:max_client],  xy['Y'][0:max_client])
     ax.scatter(xy['X'][0], xy['Y'][0], c = '#d62728' , label = "Warehouse")
@@ -62,25 +48,15 @@ def plot_costumer_location_cent(xy, max_client):
     plt.show()
         
     return
-
-# Plot Costumer location
-def plot_costumer_location_corn(xy, max_client):
-    
-    fig, ax = plt.subplots()
-    ax.scatter(xy['x'][0:max_client],  xy['y'][0:max_client])
-    ax.scatter(xy['y'][0], xy['y'][0], c = '#d62728' , label = "Warehouse")
-    
-    for i, txt in enumerate(xy['Customer XY'][0:max_client]):
-        ax.annotate(txt, (xy['x'][i], xy['y'][i]))
-    
-    plt.show()
-        
-    return
-
-# Cost fuction we want to minimize
-# Hard restriction: Truck max capacity = 1000 products    
+  
 def Cost_Function(individual):
-
+    '''
+    Cost fuction we want to minimize
+    We want to minimize the sum of the distances traveled
+    We have to take into account the capacity of the truck
+    If the capacity is surpassed then the truck has to return to the warehouse
+    The truck can only visit a customer once
+    '''
     individual = [x + 1 for x in individual]
     capacity = 1000    
     distances = []
@@ -109,7 +85,6 @@ def check_feasiblity(individual):
     if (len(set(individual)) != len(individual)): return False
     else: return True
 
-
 def penalty_fxn(individual):
     '''
     Penalty function to be implemented if individual is not feasible or violates constraint
@@ -118,8 +93,10 @@ def penalty_fxn(individual):
     '''
     return pow(int(Cost_Function(individual=individual)[0]),2)
 
-# Funtion to save statistics across diferent generations
 def SaveSatistics(individual):
+    '''
+    Funtion that saves statistics across diferent generations
+    '''
     return individual.fitness.values
 
 ########### Initializations ############
@@ -141,7 +118,7 @@ toolbox = base.Toolbox()
 # Register Genes
 # The genes will be a list of a possible path
 # Were each index is a costumer
-toolbox.register("Genes", np.random.permutation, n_costumers)
+toolbox.register("Genes", np.random.permutation, n_customers)
 
 # (5)
 # Register the individuals
@@ -214,6 +191,7 @@ def main():
         result, log = algorithms.eaSimple(population=pop, toolbox=toolbox, cxpb=CXPB, mutpb=MUTPB,
                                         stats=stats, ngen=n_genarations, halloffame=hof, verbose=False)
         
+        # Saving stats
         min_array.append(log[n_genarations]['min'])
         if log[n_genarations]['min'] < short_dist:
             for j in range (n_genarations): 

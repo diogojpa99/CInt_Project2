@@ -5,27 +5,17 @@ from math import pow
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from functools import partial
 
 
 ########### Init ###########
-
-cust_ord = pd.read_csv('CustOrd.csv')
-
-# Centered
-dists_cent = pd.read_csv('CustDist_WHCentral.csv')
-xy_cent = pd.read_csv('CustXY_WHCentral.csv')
 
 # Not Centered
 dists_corn = pd.read_csv('CustDist_WHCorner.csv')
 xy_corn = pd.read_csv('CustXY_WHCorner.csv')
 
 # Number of costumers
-n_costumers = 10
-#n_costumers = 30 
-#n_costumers = 50
-
-# Total number of products per 50 costumers
-#print(sum(cust_ord['Orders'])) 
+n_customers = 10
 
 # Number of genarations
 n_genarations = 40
@@ -37,34 +27,16 @@ if (n_population*n_genarations) > 100000:
     print('ERROR: Maximum number of evaluations has exceeded')
     exit(0)
     
-# Dist_cent 'preprocessing'
-#print(dists_cent)
-'''dist = dists_cent.to_numpy()
-dist= np.delete(dist, 0, axis=1)'''
-
 # Dist_corn 'preprocessing'
 dist = dists_corn.to_numpy()
 dist= np.delete(dist, 0, axis=1)
 
 ########### Functions ############
 
-# Plot Costumer location
-def plot_costumer_location_cent(xy, max_client):
-    
-    fig, ax = plt.subplots()
-    ax.scatter(xy['X'][0:max_client],  xy['Y'][0:max_client])
-    ax.scatter(xy['X'][0], xy['Y'][0], c = '#d62728' , label = "Warehouse")
-    
-    for i, txt in enumerate(xy['Customer XY'][0:max_client]):
-        ax.annotate(txt, (xy['X'][i], xy['Y'][i]))
-    
-    plt.show()
-        
-    return
-
-# Plot Costumer location
 def plot_costumer_location_corn(xy, max_client):
-    
+    '''
+    Plot Customer location 
+    '''    
     fig, ax = plt.subplots()
     ax.scatter(xy['x'][0:max_client],  xy['y'][0:max_client])
     ax.scatter(xy['y'][0], xy['y'][0], c = '#d62728' , label = "Warehouse")
@@ -75,11 +47,15 @@ def plot_costumer_location_corn(xy, max_client):
     plt.show()
         
     return
-
-# Cost fuction we want to minimize
-# Hard restriction: Truck max capacity = 1000 products    
+ 
 def Cost_Function(individual):
-
+    '''
+    Cost fuction we want to minimize
+    We want to minimize the sum of the distances traveled
+    We have to take into account the capacity of the truck
+    If the capacity is surpassed then the truck has to return to the warehouse
+    The truck can only visit a customer once
+    '''
     individual = [x + 1 for x in individual]
     capacity = 1000    
     distances = []
@@ -108,7 +84,6 @@ def check_feasiblity(individual):
     if (len(set(individual)) != len(individual)): return False
     else: return True
 
-
 def penalty_fxn(individual):
     '''
     Penalty function to be implemented if individual is not feasible or violates constraint
@@ -117,9 +92,43 @@ def penalty_fxn(individual):
     '''
     return pow(int(Cost_Function(individual=individual)[0]),2)
 
-# Funtion to save statistics across diferent generations
 def SaveSatistics(individual):
+    '''
+    Funtion that saves statistics across diferent generations
+    '''
     return individual.fitness.values
+
+def Heuristics_individual_corn(n_customer):
+    '''
+    Create the individual using Heuristics
+    '''
+    indiv = []
+    xy_cust = xy_corn[xy_corn['Customer XY'] < n_customer+1]
+    xy_cust = xy_cust.drop(0)
+        
+    # (1)
+    # Spilt the x axis in half
+    horiz_mid = (max(xy_cust['x'])+min(xy_cust['x']))/2
+    #horiz_mid = 50
+    
+    # (2)
+    # Split the population in two: left and right
+    left_cust = xy_cust[xy_cust['x'] < horiz_mid]
+    right_cust = xy_cust[xy_cust['x'] >= horiz_mid]
+    
+    # (3)
+    # Start with the customers from the left side: Down -> Up
+    left_cust = left_cust.sort_values(by=['y'])
+    indiv = left_cust['Customer XY'].values
+
+    # (4)
+    # Customers in the right side: Up -> Down
+    right_cust = right_cust.sort_values(by=['y'], ascending=False)
+    indiv = np.concatenate((indiv,right_cust['Customer XY'].values), axis = None)
+    
+    indiv = [x - 1 for x in indiv]
+    
+    return indiv
 
 ########### Initializations ############
 
@@ -140,11 +149,15 @@ toolbox = base.Toolbox()
 # Register Genes
 # The genes will be a list of a possible path
 # Were each index is a costumer
-toolbox.register("Genes", np.random.permutation, n_costumers)
+toolbox.register("Genes", np.random.permutation, n_customers)
+# Register Heuristic Gene
+toolbox.register("Gene_heuristic",  partial(Heuristics_individual_corn,n_customers))
 
 # (5)
 # Register the individuals
 toolbox.register("individual", tools.initIterate, creator.Individual,toolbox.Genes) 
+# Register Heuristic Individual
+toolbox.register("individual_heuristic", tools.initIterate, creator.Individual, toolbox.Gene_heuristic)
 
 # (6)
 # Register Population
@@ -205,6 +218,9 @@ def main():
         # (16)
         # Initiate population
         pop = toolbox.population(n=n_population)
+        #Include heuristics individual in population
+        heuris_indv = toolbox.individual_heuristic()
+        pop[0] = heuris_indv 
             
         start_time1 = time.process_time() # Program time
         
@@ -213,6 +229,7 @@ def main():
         result, log = algorithms.eaSimple(population=pop, toolbox=toolbox, cxpb=CXPB, mutpb=MUTPB,
                                         stats=stats, ngen=n_genarations, halloffame=hof, verbose=False)
         
+        # Saving Statistics        
         min_array.append(log[n_genarations]['min'])
         if log[n_genarations]['min'] < short_dist:
             for j in range (n_genarations): 
@@ -226,7 +243,8 @@ def main():
         
     print('MEAN:', np.mean(min_array))
     print('STD:', np.std(min_array))
-    np.save('10-Costumers/stats/WHCorner_Ord50best.npy', best_run)
+    print('Heuristics Path:',  [x + 1 for x in heuris_indv], '| Distance: ', Cost_Function(heuris_indv)[0])
+    np.save('Heuristics-10-Costumers/stats/WHCorner_Ord50best.npy', best_run)
     
     return
 
