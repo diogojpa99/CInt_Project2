@@ -5,6 +5,7 @@ from math import pow
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from functools import partial
 
 
 ########### Init ###########
@@ -99,6 +100,38 @@ def SaveSatistics(individual):
     '''
     return individual.fitness.values
 
+def Heuristics_individual_cent(n_customer):
+    '''
+    Create the individual using Heuristics
+    '''
+    indiv = []
+    xy_cust = xy_cent[xy_cent['Customer XY'] < n_customer+1]
+    xy_cust = xy_cust.drop(0)
+        
+    # (1)
+    # Spilt the x axis in half
+    #horiz_mid = (max(xy['X'])+min(xy['X']))/2
+    horiz_mid = 50
+    
+    # (2)
+    # Split the population in two: left and right
+    left_cust = xy_cust[xy_cust['X'] < horiz_mid]
+    right_cust = xy_cust[xy_cust['X'] >= horiz_mid]
+    
+    # (3)
+    # Start with the customers from the left side: Down -> Up
+    left_cust = left_cust.sort_values(by=['Y'])
+    indiv = left_cust['Customer XY'].values
+
+    # (4)
+    # Customers in the right side: Up -> Down
+    right_cust = right_cust.sort_values(by=['Y'], ascending=False)
+    indiv = np.concatenate((indiv,right_cust['Customer XY'].values), axis = None)
+    
+    indiv = [x - 1 for x in indiv]
+    
+    return indiv
+
 ########### Initializations ############
 
 # (1)
@@ -119,10 +152,14 @@ toolbox = base.Toolbox()
 # The genes will be a list of a possible path
 # Were each index is a costumer
 toolbox.register("Genes", np.random.permutation, n_customers)
+# Register Heuristic Gene
+toolbox.register("Gene_heuristic",  partial(Heuristics_individual_cent,n_customers))
 
 # (5)
 # Register the individuals
 toolbox.register("individual", tools.initIterate, creator.Individual,toolbox.Genes) 
+# Register Heuristic Individual
+toolbox.register("individual_heuristic", tools.initIterate, creator.Individual, toolbox.Gene_heuristic)
 
 # (6)
 # Register Population
@@ -183,6 +220,9 @@ def main():
         # (16)
         # Initiate population
         pop = toolbox.population(n=n_population)
+        #Include heuristics individual in population
+        heuris_indv = toolbox.individual_heuristic()
+        pop[0] = heuris_indv 
             
         start_time1 = time.process_time() # Program time
         
@@ -205,7 +245,8 @@ def main():
         
     print('MEAN:', np.mean(min_array))
     print('STD:', np.std(min_array))
-    np.save('50-Costumers/stats/WHCentral_Ord50best.npy', best_run)
+    print('Heuristics Path:',  [x + 1 for x in heuris_indv], '| Distance: ', Cost_Function(heuris_indv)[0])
+    np.save('Heuristics-50-Costumers/stats/WHCentral_Ord50best.npy', best_run)
     
     return
 
