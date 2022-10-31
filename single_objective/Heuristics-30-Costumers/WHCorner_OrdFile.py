@@ -9,23 +9,15 @@ import matplotlib.pyplot as plt
 
 ########### Init ###########
 
+# Orders
 cust_ord = pd.read_csv('CustOrd.csv')
-
-# Centered
-dists_cent = pd.read_csv('CustDist_WHCentral.csv')
-xy_cent = pd.read_csv('CustXY_WHCentral.csv')
 
 # Not Centered
 dists_corn = pd.read_csv('CustDist_WHCorner.csv')
 xy_corn = pd.read_csv('CustXY_WHCorner.csv')
 
 # Number of costumers
-#n_costumers = 10
-n_costumers = 30 
-#n_costumers = 50
-
-# Total number of products per 50 costumers
-#print(sum(cust_ord['Orders'])) 
+n_customers = 30 
 
 # Number of genarations
 n_genarations = 100
@@ -37,30 +29,11 @@ if (n_population*n_genarations) > 100000:
     print('ERROR: Maximum number of evaluations has exceeded')
     exit(0)
     
-# Dist_cent 'preprocessing'
-#print(dists_cent)
-dist = dists_cent.to_numpy()
+# Dist_corn 'preprocessing'
+dist = dists_corn.to_numpy()
 dist= np.delete(dist, 0, axis=1)
 
-# Dist_corn 'preprocessing'
-'''dist = dists_corn.to_numpy()
-dist= np.delete(dist, 0, axis=1)'''
-
 ########### Functions ############
-
-# Plot Costumer location
-def plot_costumer_location_cent(xy, max_client):
-    
-    fig, ax = plt.subplots()
-    ax.scatter(xy['X'][0:max_client],  xy['Y'][0:max_client])
-    ax.scatter(xy['X'][0], xy['Y'][0], c = '#d62728' , label = "Warehouse")
-    
-    for i, txt in enumerate(xy['Customer XY'][0:max_client]):
-        ax.annotate(txt, (xy['X'][i], xy['Y'][i]))
-    
-    plt.show()
-        
-    return
 
 # Plot Costumer location
 def plot_costumer_location_corn(xy, max_client):
@@ -117,8 +90,10 @@ def penalty_fxn(individual):
     '''
     return pow(int(Cost_Function(individual=individual)[0]),2)
 
-# Funtion to save statistics across diferent generations
 def SaveSatistics(individual):
+    '''
+    Funtion that saves statistics across diferent generations
+    '''
     return individual.fitness.values
 
 ########### Initializations ############
@@ -140,7 +115,7 @@ toolbox = base.Toolbox()
 # Register Genes
 # The genes will be a list of a possible path
 # Were each index is a costumer
-toolbox.register("Genes", np.random.permutation, n_costumers)
+toolbox.register("Genes", np.random.permutation, n_customers)
 
 # (5)
 # Register the individuals
@@ -160,7 +135,7 @@ toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
 
 # (9)
 # Selection operator 
-toolbox.register("select", tools.selTournament, tournsize = 10)
+toolbox.register("select", tools.selTournament, tournsize = 15)
 
 # (10)
 # Solution Evaluation
@@ -213,6 +188,7 @@ def main():
         result, log = algorithms.eaSimple(population=pop, toolbox=toolbox, cxpb=CXPB, mutpb=MUTPB,
                                         stats=stats, ngen=n_genarations, halloffame=hof, verbose=False)
         
+        # Saving stats
         min_array.append(log[n_genarations]['min'])
         if log[n_genarations]['min'] < short_dist:
             for j in range (n_genarations): 

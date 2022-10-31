@@ -16,7 +16,7 @@ dists_cent = pd.read_csv('CustDist_WHCentral.csv')
 xy_cent = pd.read_csv('CustXY_WHCentral.csv')
 
 # Number of costumers
-n_costumers = 50
+n_customers = 50
 
 # Number of genarations
 n_genarations = 250
@@ -118,7 +118,7 @@ toolbox = base.Toolbox()
 # Register Genes
 # The genes will be a list of a possible path
 # Were each index is a costumer
-toolbox.register("Genes", np.random.permutation, n_costumers)
+toolbox.register("Genes", np.random.permutation, n_customers)
 
 # (5)
 # Register the individuals

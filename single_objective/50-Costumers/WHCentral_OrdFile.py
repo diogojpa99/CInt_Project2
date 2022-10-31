@@ -17,7 +17,7 @@ dists_cent = pd.read_csv('CustDist_WHCentral.csv')
 xy_cent = pd.read_csv('CustXY_WHCentral.csv')
 
 # Number of costumers
-n_costumers = 50
+n_customers = 50
 
 # Number of genarations
 n_genarations = 250
@@ -94,8 +94,10 @@ def penalty_fxn(individual):
     '''
     return pow(int(Cost_Function(individual=individual)[0]),2)
 
-# Funtion to save statistics across diferent generations
 def SaveSatistics(individual):
+    '''
+    Funtion that saves statistics across diferent generations
+    '''
     return individual.fitness.values
 
 ########### Initializations ############
@@ -117,7 +119,7 @@ toolbox = base.Toolbox()
 # Register Genes
 # The genes will be a list of a possible path
 # Were each index is a costumer
-toolbox.register("Genes", np.random.permutation, n_costumers)
+toolbox.register("Genes", np.random.permutation, n_customers)
 
 # (5)
 # Register the individuals
@@ -166,7 +168,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.7, 0.7
+CXPB, MUTPB = 0.6, 0.7
 
 ########## main() ###########
 def main():
@@ -190,6 +192,7 @@ def main():
         result, log = algorithms.eaSimple(population=pop, toolbox=toolbox, cxpb=CXPB, mutpb=MUTPB,
                                         stats=stats, ngen=n_genarations, halloffame=hof, verbose=False)
         
+        # Saving stats
         min_array.append(log[n_genarations]['min'])
         if log[n_genarations]['min'] < short_dist:
             for j in range (n_genarations): 
