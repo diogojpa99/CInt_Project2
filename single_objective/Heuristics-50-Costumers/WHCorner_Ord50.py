@@ -67,7 +67,7 @@ def Cost_Function(individual):
         capacity -= 50
         # Try to simulate the truck going to zero 
         if capacity < 50:
-            distances.append(dist[individual[i],individual[0]]) # Truck has to go to from client i to warehouse
+            distances.append(dist[individual[i],0]) # Truck has to go to from client i to warehouse
             distances.append(dist[0,individual[i+1]])  # And then from the ware house to client i+1
             capacity = 1000 # Full capacity again
         else: distances.append(dist[individual[i], individual[i+1]]) 
@@ -110,8 +110,8 @@ def Heuristics_individual_corn(n_customer):
         
     # (1)
     # Spilt the x axis in half
-    horiz_mid = (max(xy_cust['x'])+min(xy_cust['x']))/2
-    #horiz_mid = 50
+    #horiz_mid = (max(xy_cust['x'])+min(xy_cust['x']))/2
+    horiz_mid = 50
     
     # (2)
     # Split the population in two: left and right

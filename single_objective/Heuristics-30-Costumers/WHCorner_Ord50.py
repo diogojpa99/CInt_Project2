@@ -67,7 +67,7 @@ def Cost_Function(individual):
         capacity -= 50
         # Try to simulate the truck going to zero 
         if capacity < 50:
-            distances.append(dist[individual[i],individual[0]]) # Truck has to go to from client i to warehouse
+            distances.append(dist[individual[i],0]) # Truck has to go to from client i to warehouse
             distances.append(dist[0,individual[i+1]])  # And then from the ware house to client i+1
             capacity = 1000 # Full capacity again
         else: distances.append(dist[individual[i], individual[i+1]]) 
@@ -204,7 +204,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.8, 0.8
+CXPB, MUTPB = 0.7, 0.7
 
 ########## main() ###########
 def main():
