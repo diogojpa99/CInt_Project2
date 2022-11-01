@@ -130,7 +130,7 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 # (7)
 # Crossover operator
-toolbox.register("mate", tools.cxOrdered)
+toolbox.register("mate", tools.cxOnePoint)
 
 # (8)
 # Mutation operator
