@@ -205,7 +205,7 @@ hof = tools.HallOfFame(1)
 # Initialized the following probabilities
 # CXPB  is the probability with which two individualsare crossed
 # MUTPB is the probability for mutating an individual
-CXPB, MUTPB = 0.8, 0.8
+CXPB, MUTPB = 0.7, 0.7
 
 ########## main() ###########
 def main():
