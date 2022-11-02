@@ -240,7 +240,7 @@ def main():
             
         
         real_hof = [x + 1 for x in hof[0]]
-        #print('Hall Of Fame:',real_hof)
+        print('Hall Of Fame:',real_hof)
         #print ("Time Used ---> ", time.process_time() - start_time1, "seconds")
         
     print('MEAN:', np.mean(min_array))
