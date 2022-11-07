@@ -35,9 +35,10 @@ dist= np.delete(dist, 0, axis=1)
 
 ########### Functions ############
 
-# Plot Costumer location
 def plot_costumer_location_corn(xy, max_client):
-    
+    '''
+    Plot Customer location 
+    '''    
     fig, ax = plt.subplots()
     ax.scatter(xy['x'][0:max_client],  xy['y'][0:max_client])
     ax.scatter(xy['y'][0], xy['y'][0], c = '#d62728' , label = "Warehouse")
@@ -49,10 +50,15 @@ def plot_costumer_location_corn(xy, max_client):
         
     return
 
-# Cost fuction we want to minimize
-# Hard restriction: Truck max capacity = 1000 products    
 def Cost_Function(individual):
-
+    '''
+    Cost fuction we want to minimize
+    We want to minimize the sum of the distances traveled
+    First the truck goes from the ware house to the costumer i
+    Then the truck goes from i to i+1, always registering the distances traveled
+    If the truck capacity goes to zero or the order of customer i+1 is higher than the truck capacity then
+    Truck has to go from customer i to warehouse, fill the capacity (=1000), and then from warehouse to i+1
+    '''
     individual = [x + 1 for x in individual]
     capacity = 1000    
     distances = []
@@ -80,7 +86,6 @@ def check_feasiblity(individual):
     # Indiviual contains repeated values
     if (len(set(individual)) != len(individual)): return False
     else: return True
-
 
 def penalty_fxn(individual):
     '''
@@ -135,7 +140,7 @@ toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
 
 # (9)
 # Selection operator 
-toolbox.register("select", tools.selTournament, tournsize = 15)
+toolbox.register("select", tools.selTournament, tournsize = 12)
 
 # (10)
 # Solution Evaluation
@@ -157,7 +162,6 @@ stats.register('max', np.max)
 
 # (14)
 # Save Hall of Fame - Best individual
-# Maximizer, or minimizer (I think)
 hof = tools.HallOfFame(1)
 
 # (15)
@@ -202,6 +206,7 @@ def main():
         
     print('MEAN:', np.mean(min_array))
     print('STD:', np.std(min_array))
+    print('Best Min:', best_run[len(best_run)-1])
     np.save('30-Costumers/stats/WHCorner_OrdFilebest.npy', best_run)
     
     return

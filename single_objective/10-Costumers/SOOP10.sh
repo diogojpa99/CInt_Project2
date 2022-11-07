@@ -1,6 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/zsh
 
-(python WHCentral_Ord50.py &
-python WHCentral_OrdFile.py &
-python WHCorner_Ord50.py &
-python WHCorner_OrdFile.py &) && python plots.py
+python WHCentral_Ord50.py 
+echo '------------------- WHCentral_Ord50.py --------------------'

@@ -53,9 +53,10 @@ def Cost_Function(individual):
     '''
     Cost fuction we want to minimize
     We want to minimize the sum of the distances traveled
-    We have to take into account the capacity of the truck
-    If the capacity is surpassed then the truck has to return to the warehouse
-    The truck can only visit a customer once
+    First the truck goes from the ware house to the costumer i
+    Then the truck goes from i to i+1, always registering the distances traveled
+    If the truck capacity goes to zero or the order of customer i+1 is higher than the truck capacity then
+    Truck has to go from customer i to warehouse, fill the capacity (=1000), and then from warehouse to i+1
     '''
     individual = [x + 1 for x in individual]
     capacity = 1000    
@@ -160,7 +161,6 @@ stats.register('max', np.max)
 
 # (14)
 # Save Hall of Fame - Best individual
-# Maximizer, or minimizer (I think)
 hof = tools.HallOfFame(1)
 
 # (15)
@@ -205,6 +205,7 @@ def main():
         
     print('MEAN:', np.mean(min_array))
     print('STD:', np.std(min_array))
+    print('Best Min:', best_run[len(best_run)-1])
     np.save('30-Costumers/stats/WHCorner_Ord50best.npy', best_run)
     
     return
